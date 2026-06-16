@@ -1,0 +1,7 @@
+Chrono Studio
+
+This project uses Meta Segment Anything Model 2 (SAM 2). SAM 2 model
+checkpoints, demo code, and training code are licensed under the Apache License
+2.0 by Meta Platforms, Inc. and affiliates.
+
+SAM 2 repository: https://github.com/facebookresearch/sam2

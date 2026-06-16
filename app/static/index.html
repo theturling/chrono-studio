@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Chrono Studio</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div id="toast"></div>
+  <div id="imageLightbox" class="image-lightbox hidden" role="dialog" aria-modal="true" aria-label="Image preview">
+    <button id="lightboxClose" class="lightbox-close" aria-label="Close image preview">×</button>
+    <img id="lightboxImage" alt="">
+    <div id="lightboxCaption" class="lightbox-caption"></div>
+  </div>
+  <header class="appbar">
+    <div class="brand"><span class="brand-mark">CS</span><div><strong>Chrono Studio</strong><small>Motion still editor</small></div></div>
+    <div class="project-title"><input id="projectName" value="Untitled project"><span id="saveState">Not saved</span></div>
+    <div class="top-actions">
+      <button id="newProject" class="quiet">New</button>
+      <label class="button quiet" for="videoInput">Import video</label>
+      <input id="videoInput" type="file" accept="video/*">
+      <button id="exportButton" class="accent">Export</button>
+    </div>
+  </header>
+
+  <main class="studio">
+    <aside class="toolrail">
+      <div id="railModeLabel" class="rail-mode">CHRONO</div>
+      <button data-tool="select" class="tool active"><b>↖</b><span>Select</span></button>
+      <button data-tool="positive" data-workspace="chrono" class="tool"><b>＋</b><span>Include</span></button>
+      <button data-tool="negative" data-workspace="chrono" class="tool"><b>−</b><span>Exclude</span></button>
+      <button data-tool="box" data-workspace="chrono" class="tool"><b>□</b><span>Mask box</span></button>
+      <button data-tool="crop" data-workspace="storyboard" class="tool hidden"><b>⌗</b><span>Crop</span></button>
+      <div class="rail-spacer"></div>
+      <button id="healthButton" class="tool"><b>●</b><span>System</span></button>
+    </aside>
+
+    <section class="center">
+      <div class="modebar">
+        <div class="mode-switch">
+          <button data-mode="chrono" class="active"><b>Chrono composite</b><small>Layer masked moments</small></button>
+          <button data-mode="storyboard"><b>Storyboard strip</b><small>Arrange cropped frames</small></button>
+        </div>
+        <div id="modeIdentity" class="mode-identity"><b>Chrono workspace</b><span>Frames, masks, background and export are isolated here.</span></div>
+        <div class="frame-actions">
+          <button id="setBackground">Set background</button>
+          <button id="addFrame" class="accent">Select current frame</button>
+        </div>
+      </div>
+
+      <div class="stage-shell">
+        <div id="emptyState" class="empty-state">
+          <div class="empty-glyph">▶</div>
+          <h1>Shape motion into one frame.</h1>
+          <p>Import a video, choose moments, then build a composite or storyboard.</p>
+          <label class="button accent" for="videoInput">Import your first video</label>
+        </div>
+        <div id="stage" class="stage hidden">
+          <video id="video" preload="metadata" muted playsinline></video>
+          <canvas id="canvas"></canvas>
+        </div>
+        <div id="processing" class="processing hidden"><span></span><b>Processing</b></div>
+      </div>
+
+      <div class="transport">
+        <button id="prevFrame">‹</button><button id="playPause">Play</button><button id="nextFrame">›</button>
+        <input id="timeline" type="range" min="0" max="0" value="0">
+        <label>Frame <input id="frameInput" type="number" min="0" value="0"></label>
+        <span id="videoMeta">No video</span>
+      </div>
+    </section>
+
+    <aside class="inspector">
+      <div class="inspector-head"><span>Inspector</span><b id="activeFrameLabel">No frame selected</b></div>
+      <section id="chronoInspector">
+        <div class="section-title"><span>Segmentation</span><button id="clearPrompts">Clear</button></div>
+        <div id="promptSummary" class="prompt-summary">Use Include, Exclude, or Mask box on the canvas.</div>
+        <button id="runSegment" class="wide accent">Generate mask</button>
+        <img id="maskPreview" class="mask-preview" alt="">
+        <div class="section-title"><span>Layer effects</span><button id="applyEffectsAll">Apply to all</button></div>
+        <label class="field"><span>Opacity <output id="opacityOut">100%</output></span><input id="opacity" type="range" min="0" max="1" value="1" step=".05"></label>
+        <label class="field"><span>Edge feather <output id="featherOut">2 px</output></span><input id="feather" type="range" min="0" max="30" value="2"></label>
+        <label class="field"><span>Outline <output id="outlineOut">3 px</output></span><input id="outlineWidth" type="range" min="0" max="16" value="3"></label>
+        <label class="field row"><span>Outline color</span><input id="outlineColor" type="color" value="#ff8a3d"></label>
+      </section>
+      <section id="storyboardInspector" class="hidden">
+        <div class="section-title"><span>Crop region</span><button id="applyCropAll">Apply to all</button></div>
+        <div class="prompt-summary">Choose Crop, then drag a region on the canvas.</div>
+        <label class="field"><span>Separator <output id="gapOut">12 px</output></span><input id="gap" type="range" min="0" max="100" value="12"></label>
+        <label class="field row"><span>Separator color</span><input id="gapColor" type="color" value="#f4f0e8"></label>
+        <label class="field row"><span>Output height</span><input id="targetHeight" type="number" min="0" placeholder="Auto"></label>
+      </section>
+      <div class="section-title"><span>Output preview</span></div>
+      <img id="resultPreview" class="result-preview" alt="">
+      <a id="downloadLink" class="wide button disabled" download>Download latest output</a>
+    </aside>
+
+    <section class="timeline-panel">
+      <header><div><strong id="timelineTitle">Chrono layers</strong><span id="queueCount">0 frames</span></div><small id="timelineHint">Drag to set layer order · click to edit</small></header>
+      <div id="frameList" class="frame-list"><div class="timeline-empty">Selected frames will appear here.</div></div>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
